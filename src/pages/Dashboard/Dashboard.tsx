@@ -6,7 +6,7 @@ import MainLoader from "../../components/common/MainLoader";
 import api from "../../lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../components/ui/button";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Trash2, Edit3, Calendar, RefreshCw, FileText, Plus } from "lucide-react";
 import { toastUtils } from "../../lib/toast";
 import useUserStore from "../../Store/userStore";
 import {
@@ -143,139 +143,169 @@ export default function Notes() {
 
   if (isError) {
     return (
-      <div className="text-center mt-10 p-6">
-        <p className="text-red-500 font-medium">
-          Error loading notes: {(error as Error).message}
-        </p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-        >
-          Retry
-        </button>
-      </div>
+      <DashboardLayout title="Error" subtitle="Something went wrong">
+        <div className="text-center py-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-red-600 font-medium mb-4">
+            Error loading notes: {(error as Error).message}
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Retry
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!notes || notes.length === 0) {
     return (
-       <DashboardLayout>
-      <div className="text-center mt-10 p-6">
-        <p className="text-muted-foreground text-lg">No notes available</p>
-        <p className="text-muted-foreground/70 mt-2">
-          When users make their notes public, they'll appear here
+       <DashboardLayout title="My Notes" subtitle="Create and manage your personal notes">
+      <div className="text-center py-12">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full mb-6">
+          <FileText className="w-10 h-10 text-emerald-600" />
+        </div>
+        <h3 className="text-2xl font-semibold text-gray-800 mb-3">No notes yet</h3>
+        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          Start creating your first note to organize your thoughts and ideas
         </p>
+        <Button 
+          onClick={() => navigate('/dashboard/notes/new')}
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create Your First Note
+        </Button>
       </div>
        </DashboardLayout>
     );
   }
 
   return (
-    <>
-    <DashboardLayout>
-    
-      <div className="p-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">My Notes</h1>
+    <DashboardLayout title="My Notes" subtitle="Create and manage your personal notes">
+      {/* Quick Actions Bar */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-emerald-100/50 p-6 shadow-lg mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                {notes?.length || 0} {notes?.length === 1 ? 'Note' : 'Notes'}
+              </h3>
+              <p className="text-sm text-gray-600">Your personal collection</p>
+            </div>
+          </div>
+          <Button 
+            onClick={() => navigate('/dashboard/notes/new')}
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Note
+          </Button>
         </div>
+      </div>
 
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-          {notes.map((note) => (
-            <article
-              key={note.id}
-              className="
-                break-inside-avoid
-                group overflow-hidden rounded-2xl 
-                border border-border/70 
-                bg-card shadow-sm hover:shadow-lg 
-                hover:border-border 
-                transition-all duration-300 hover:-translate-y-1
-                cursor-pointer
-                relative
-              "
-              onClick={() => handleNoteClick(note.id)}
-            >
-             
-              
-              <div className="p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-                      {new Date(note.dateCreated).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </p>
-                    {note.lastUpdated !== note.dateCreated && (
-                      <p className="text-xs text-muted-foreground/60 mt-1">
-                        Updated {new Date(note.lastUpdated).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <h2 className="text-xl font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                  {note.title}
-                </h2>
-
-                {note.user && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    By {note.user.firstName} {note.user.lastName}
-                  </p>
+      {/* Notes Grid */}
+      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+        {notes.map((note) => (
+          <article
+            key={note.id}
+            className="
+              break-inside-avoid
+              group overflow-hidden rounded-2xl 
+              border border-emerald-100/50 
+              bg-white/80 backdrop-blur-sm shadow-md hover:shadow-xl 
+              hover:border-emerald-200/70 
+              transition-all duration-300 hover:-translate-y-1
+              cursor-pointer
+              relative
+            "
+            onClick={() => handleNoteClick(note.id)}
+          >
+            <div className="p-6 space-y-4">
+              {/* Date and metadata */}
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Calendar className="w-3 h-3 text-emerald-500" />
+                <span>
+                  {new Date(note.dateCreated).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+                {note.lastUpdated !== note.dateCreated && (
+                  <span className="flex items-center gap-1 text-gray-400">
+                    <RefreshCw className="w-3 h-3" />
+                    Updated
+                  </span>
                 )}
-
-                {note.synopsis && (
-                  <p className="text-muted-foreground line-clamp-3">
-                    {note.synopsis}
-                  </p>
-                )}
-                <div className="pt-3 border-t border-border/30">
-                  {/* <p className="text-sm text-muted-foreground/80 line-clamp-4">
-                    {note.content.substring(0, 200)}...
-                  </p> */}
-                  <p className="text-xs text-primary mt-2 font-medium">
-                    Click to read more →
-                  </p>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-3 border-t border-border/30">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditNote(note.id);
-                    }} 
-                    disabled={isProcessingNote === note.id}
-                    className="flex-1"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTrashNote(note.id);
-                    }}
-                    disabled={isProcessingNote === note.id}
-                    className="flex-1 gap-1.5"
-                  >
-                    {isProcessingNote === note.id ? (
-                      <MainLoader />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                    Trash
-                  </Button>
-                </div>
-                
               </div>
-            </article>
-          ))}
-        </div>
+
+              {/* Title */}
+              <h2 className="text-xl font-bold leading-tight line-clamp-2 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent group-hover:from-emerald-700 group-hover:to-teal-700 transition-all duration-200">
+                {note.title}
+              </h2>
+
+              {/* Synopsis */}
+              {note.synopsis && (
+                <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                  {note.synopsis.length > 120 ? `${note.synopsis.substring(0, 120)}...` : note.synopsis}
+                </p>
+              )}
+
+              {/* Content preview */}
+              <div className="pt-3 border-t border-emerald-100/30">
+                <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                  Click to read more
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </p>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-3 border-t border-emerald-100/30">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditNote(note.id);
+                  }} 
+                  disabled={isProcessingNote === note.id}
+                  className="flex-1 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300"
+                >
+                  <Edit3 className="w-3 h-3 mr-1" />
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTrashNote(note.id);
+                  }}
+                  disabled={isProcessingNote === note.id}
+                  className="flex-1 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600 hover:text-red-700"
+                >
+                  {isProcessingNote === note.id ? (
+                    <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Trash2 className="w-3 h-3" />
+                  )}
+                  Trash
+                </Button>
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
 
       {/* Loading overlay */}
@@ -292,20 +322,26 @@ export default function Notes() {
 
       {/* Trash Confirmation Dialog */}
       <Dialog open={trashDialogOpen} onOpenChange={setTrashDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white/95 backdrop-blur-sm border border-emerald-100/50">
           <DialogHeader>
-            <DialogTitle>Move to Trash</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to move this note to trash? You can restore it later from the trash.
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <DialogTitle className="text-xl font-semibold text-gray-800">Move to Trash</DialogTitle>
+            </div>
+            <DialogDescription className="text-gray-600">
+              Are you sure you want to move this note to trash? You can restore it later from the trash section.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button
               variant="outline"
               onClick={() => {
                 setTrashDialogOpen(false);
                 setNoteToTrash(null);
               }}
+              className="border-emerald-200 hover:bg-emerald-50"
             >
               Cancel
             </Button>
@@ -313,20 +349,23 @@ export default function Notes() {
               variant="destructive"
               onClick={confirmTrashNote}
               disabled={isProcessingNote !== null}
+              className="bg-red-500 hover:bg-red-600 text-white"
             >
               {isProcessingNote ? (
-                <>
-                  <MainLoader />
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Moving...
-                </>
+                </span>
               ) : (
-                "Move to Trash"
+                <span className="flex items-center gap-2">
+                  <Trash2 className="w-4 h-4" />
+                  Move to Trash
+                </span>
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
-    </>
   );
 }

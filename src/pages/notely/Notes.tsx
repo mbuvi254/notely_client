@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { type NoteData } from "../../types/noteTypes";
 import { useNavigate } from "react-router-dom";
 import MainLoader from "../../components/common/MainLoader";
 import publicApi from "../../lib/publicApi";
 import { useQuery } from "@tanstack/react-query";
+import { User, Globe, Calendar, RefreshCw } from "lucide-react";
 
-// Define a proper interface for the API response
+
 interface PublicNote {
   id: string;
   userId: string;
@@ -27,22 +27,20 @@ interface PublicNote {
 export default function Notes() {
   const navigate = useNavigate();
   const [isNavigating, setIsNavigating] = useState(false);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   const { data: notes, isLoading, isError, error } = useQuery<PublicNote[]>({
     queryKey: ["get-public-notes"],
     queryFn: async () => {
       const response = await publicApi.get("/public/notes");
-      // Adjust based on your actual API response structure
+     
       return response.data.notes || response.data.data || response.data;
     },
   });
 
   const handleNoteClick = (noteId: string) => {
-    setSelectedNoteId(noteId);
     setIsNavigating(true);
     
-    // Small delay for better UX
+
     setTimeout(() => {
       navigate(`/public/notes/${noteId}`);
       setIsNavigating(false);
@@ -60,13 +58,19 @@ export default function Notes() {
   if (isError) {
     return (
       <div className="text-center mt-10 p-6">
-        <p className="text-red-500 font-medium">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+          <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <p className="text-red-600 font-medium mb-4">
           Error loading notes: {(error as Error).message}
         </p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 shadow-md hover:shadow-lg"
         >
+          <RefreshCw className="w-4 h-4" />
           Retry
         </button>
       </div>
@@ -87,13 +91,6 @@ export default function Notes() {
   return (
     <>
       <div className="p-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Public Notes</h1>
-          <p className="text-muted-foreground mt-2">
-            Browse notes shared by the community
-          </p>
-        </div>
-
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
           {notes.map((note) => (
             <article
@@ -101,65 +98,79 @@ export default function Notes() {
               className="
                 break-inside-avoid
                 group overflow-hidden rounded-2xl 
-                border border-border/70 
-                bg-card shadow-sm hover:shadow-lg 
-                hover:border-border 
+                border border-emerald-100/50 
+                bg-white/80 backdrop-blur-sm shadow-md hover:shadow-xl 
+                hover:border-emerald-200/70 
                 transition-all duration-300 hover:-translate-y-1
                 cursor-pointer
                 relative
               "
               onClick={() => handleNoteClick(note.id)}
             >
-              {/* Optional: Public badge */}
+              {/* Public badge */}
               {note.isPublic && (
-                <div className="absolute top-3 right-3 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-medium border border-emerald-200">
+                  <Globe className="w-3 h-3" />
                   Public
                 </div>
               )}
               
               {/* Content */}
               <div className="p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-                      {new Date(note.dateCreated).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </p>
-                    {note.lastUpdated !== note.dateCreated && (
-                      <p className="text-xs text-muted-foreground/60 mt-1">
-                        Updated {new Date(note.lastUpdated).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
+                {/* Date and metadata */}
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Calendar className="w-3 h-3 text-emerald-500" />
+                  <span>
+                    {new Date(note.dateCreated).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
+                  {note.lastUpdated !== note.dateCreated && (
+                    <span className="flex items-center gap-1 text-gray-400">
+                      <RefreshCw className="w-3 h-3" />
+                      Updated
+                    </span>
+                  )}
                 </div>
 
-                <h2 className="text-xl font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                {/* Title */}
+                <h2 className="text-xl font-bold leading-tight line-clamp-2 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent group-hover:from-emerald-700 group-hover:to-teal-700 transition-all duration-200">
                   {note.title}
                 </h2>
 
+                {/* Author info */}
                 {note.user && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    By {note.user.firstName} {note.user.lastName}
-                  </p>
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100/30">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 flex items-center justify-center text-white text-sm font-medium">
+                      {note.user.firstName[0]}{note.user.lastName[0]}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-800">
+                        {note.user.firstName} {note.user.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Author
+                      </p>
+                    </div>
+                    <User className="w-4 h-4 text-emerald-500" />
+                  </div>
                 )}
 
+                {/* Synopsis */}
                 {note.synopsis && (
-                  <p className="text-muted-foreground line-clamp-3">
-                    {note.synopsis}
+                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed min-h-[2.5rem]">
+                    {note.synopsis.length > 120 ? `${note.synopsis.substring(0, 120)}...` : note.synopsis}
                   </p>
                 )}
 
-                {/* Preview of content */}
+                {/* Content preview */}
                 {note.content && (
-                  <div className="pt-3 border-t border-border/30">
-                    {/* <p className="text-sm text-muted-foreground/80 line-clamp-4">
-                      {note.content.substring(0, 200)}...
-                    </p> */}
-                    <p className="text-xs text-primary mt-2 font-medium">
-                      Click to read more →
+                  <div className="pt-3 border-t border-emerald-100/30">
+                    <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                      Click to read more
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </p>
                   </div>
                 )}

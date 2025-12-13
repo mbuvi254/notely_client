@@ -74,3 +74,18 @@ src/
 │   ├── api.ts     # API client
 │   └── utils.ts   # Helper functions
 └── types/         # TypeScript types
+
+
+🤝 Contributing
+Fork the repository
+Create your feature branch (git checkout -b feature/AmazingFeature)
+Commit your changes (git commit -m 'Add some AmazingFeature')
+Push to the branch (git push origin feature/AmazingFeature)
+Open a Pull Request
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+🙏 Acknowledgments
+shadcn/ui for the beautiful components
+Tailwind CSS for the utility-first CSS framework
+Vite for the amazing development experience

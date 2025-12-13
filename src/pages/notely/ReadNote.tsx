@@ -35,18 +35,16 @@ const ReadNote = () => {
   const { id: userId, setUser, clearUser } = useUserStore();
   const [isOwner, setIsOwner] = useState(false);
 
-  // Fetch note data
+
   const { data: note, isLoading, isError, error } = useQuery<NoteData>({
     queryKey: ["get-note", id],
     queryFn: async () => {
       if (!id) throw new Error("Note ID is required");
       
       try {
-        // Try authenticated access first
         const response = await api.get(`/notes/${id}`);
         return response.data.note || response.data.data || response.data;
       } catch (authError) {
-        // If authenticated access fails, try public access
         const publicResponse = await publicApi.get(`public/notes/${id}`);
         return publicResponse.data.note || publicResponse.data.data || publicResponse.data;
       }
@@ -66,7 +64,6 @@ const ReadNote = () => {
     checkAuthStatus();
   }, [setUser, clearUser]);
 
-  // Check if current user is the note owner
   useEffect(() => {
     if (note && userId) {
       setIsOwner(note.userId === userId);
@@ -111,7 +108,6 @@ const ReadNote = () => {
 
 export default ReadNote;
 
-// Helper Components
 const MainLoaderWrapper = () => (
   <div className="h-[60vh] flex justify-center items-center">
     <MainLoader />

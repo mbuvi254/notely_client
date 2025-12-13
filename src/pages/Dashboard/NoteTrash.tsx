@@ -7,7 +7,7 @@ import api from "../../lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toastUtils } from "../../lib/toast";
 import { Button } from "../../components/ui/button";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { Trash2, Trash, RotateCw, AlertTriangle, Calendar, Clock, Shield, Archive } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -139,12 +139,20 @@ export default function NoteTrash() {
 
   if (!notes || notes.length === 0) {
     return (
-      <DashboardLayout>
-        <div className="text-center mt-10 p-6">
-          <p className="text-muted-foreground text-lg">No notes in trash</p>
-          <p className="text-muted-foreground/70 mt-2">
-            Notes you move to trash will appear here
-          </p>
+      <DashboardLayout title="Trash" subtitle="Manage deleted notes and restore or permanently delete them">
+        <div className="text-center mt-20 p-8">
+          <div className="w-20 h-20 bg-gradient-to-r from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Trash className="w-10 h-10 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">Trash is Empty</h3>
+          <p className="text-gray-600 mb-8">Notes you move to trash will appear here</p>
+          <Button 
+            onClick={() => navigate("/dashboard/notes/new")}
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 gap-2"
+          >
+            <Archive className="w-4 h-4" />
+            Create New Note
+          </Button>
         </div>
       </DashboardLayout>
     );
@@ -152,114 +160,134 @@ export default function NoteTrash() {
 
   return (
     <>
-    <DashboardLayout>
+    <DashboardLayout title="Trash" subtitle="Manage deleted notes and restore or permanently delete them">
     
-      <div className="p-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Trash</h1>
-          <p className="text-muted-foreground mt-2">Notes you've moved to trash</p>
+      <div className="p-6">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+              <Trash className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                Note Trash
+              </h1>
+              <p className="text-gray-600 mt-1">Manage deleted notes and restore or permanently delete them</p>
+            </div>
+          </div>
+          
+          {/* Stats Card */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-red-100/50 p-4 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-red-600">{notes.length}</p>
+                <p className="text-sm text-gray-600">Notes in Trash</p>
+              </div>
+              <div className="ml-auto">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+        {/* Warning Message */}
+        <div className="bg-yellow-50/80 backdrop-blur-sm rounded-xl border border-yellow-200/50 p-4 mb-8 shadow-lg">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600" />
+            <div>
+              <h3 className="text-sm font-semibold text-yellow-800">Important Notice</h3>
+              <p className="text-sm text-yellow-700">Notes in trash will be permanently deleted after 30 days. You can restore them before that time.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Notes Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {notes.map((note) => (
             <article
               key={note.id}
-              className="
-                break-inside-avoid
-                group overflow-hidden rounded-2xl 
-                border border-border/70 
-                bg-card shadow-sm hover:shadow-lg 
-                hover:border-border 
-                transition-all duration-300 hover:-translate-y-1
-                cursor-pointer
-                relative
-              "
-              // onClick={() => handleNoteClick(note.id)}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-red-100/50 shadow-lg hover:shadow-xl hover:border-red-200/70 transition-all duration-300 hover:-translate-y-1 relative group"
             >
-             
+              <div className="absolute top-3 right-3">
+                <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-md">
+                  Deleted
+                </span>
+              </div>
               
               <div className="p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-                      {new Date(note.dateCreated).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </p>
-                    {note.lastUpdated !== note.dateCreated && (
-                      <p className="text-xs text-muted-foreground/60 mt-1">
-                        Updated {new Date(note.lastUpdated).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Calendar className="w-3 h-3" />
+                  {new Date(note.dateCreated).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                  {note.lastUpdated !== note.dateCreated && (
+                    <span className="ml-2 text-gray-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Updated {new Date(note.lastUpdated).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
 
-                <h2 className="text-xl font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                <h2 className="text-xl font-bold leading-tight line-clamp-2 text-gray-800 group-hover:text-red-600 transition-colors">
                   {note.title}
                 </h2>
 
                 {note.user && (
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-gray-600 flex items-center gap-2">
+                    <Shield className="w-3 h-3" />
                     By {note.user.firstName} {note.user.lastName}
                   </p>
                 )}
 
-                {/* {note.synopsis && (
-                  <p className="text-muted-foreground line-clamp-3">
+                {note.synopsis && (
+                  <p className="text-gray-600 line-clamp-3 text-sm">
                     {note.synopsis}
                   </p>
-                )} */}
-
-                {/* {note.content && (
-                  // <div className="pt-3 border-t border-border/30">
-                  //   <p className="text-sm text-muted-foreground/80 line-clamp-4">
-                  //       {note.content.substring(0, 200)}...
-                  //     </p>
-                  //   <p className="text-xs text-primary mt-2 font-medium">
-                  //     Click to read more →
-                  //   </p>
-                  // </div>
-                )} */}
-              </div>
+                )}
+                
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-3 border-t border-border/30">
+                <div className="flex gap-2 pt-3 border-t border-red-100/30">
                   <Button 
                     size="sm" 
-                    variant="outline" 
+                    variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRestore(note.id);
                     }} 
                     disabled={isProcessing === note.id}
-                    className="flex-1 gap-1.5"
+                    className="flex-1 border-emerald-200 hover:bg-emerald-50 text-emerald-600"
                   >
                     {isProcessing === note.id ? (
-                      <MainLoader />
+                      <div className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <RotateCcw className="h-4 w-4" />
+                      <RotateCw className="w-3 h-3 mr-1" />
                     )}
                     Restore
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(note.id);
                     }}
                     disabled={isProcessing === note.id}
-                    className="flex-1 gap-1.5"
                   >
                     {isProcessing === note.id ? (
-                      <MainLoader />
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="w-3 h-3 mr-1" />
                     )}
                     Delete
                   </Button>
                 </div>
+              </div>
             </article>
           ))}
         </div>
@@ -267,45 +295,49 @@ export default function NoteTrash() {
 
       {/* Loading overlay */}
       {isNavigating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
           <div className="text-center">
             <MainLoader />
-            <p className="mt-4 text-muted-foreground">
-              Opening note...
-            </p>
+            <p className="mt-4 text-gray-600">Opening note...</p>
           </div>
         </div>
       )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white/95 backdrop-blur-sm border-red-100/50 shadow-xl">
           <DialogHeader>
-            <DialogTitle>Delete Permanently</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to permanently delete this note? This action cannot be undone.
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-white" />
+              </div>
+              <DialogTitle className="text-xl font-bold text-gray-800">Delete Permanently</DialogTitle>
+            </div>
+            <DialogDescription className="text-gray-600">
+              Are you sure you want to permanently delete this note? This action cannot be undone and the note will be lost forever.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setNoteToDelete(null);
               }}
+              className="border-gray-200 hover:bg-gray-50 text-gray-600"
             >
               Cancel
             </Button>
             <Button
-              variant="destructive"
               onClick={confirmDelete}
               disabled={isProcessing !== null}
+              className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
               {isProcessing ? (
-                <>
-                  <MainLoader />
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Deleting...
-                </>
+                </span>
               ) : (
                 "Delete Permanently"
               )}
@@ -316,32 +348,39 @@ export default function NoteTrash() {
 
       {/* Restore Confirmation Dialog */}
       <Dialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white/95 backdrop-blur-sm border-emerald-100/50 shadow-xl">
           <DialogHeader>
-            <DialogTitle>Restore Note</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to restore this note? It will be moved back to your notes.
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                <RotateCw className="w-5 h-5 text-white" />
+              </div>
+              <DialogTitle className="text-xl font-bold text-gray-800">Restore Note</DialogTitle>
+            </div>
+            <DialogDescription className="text-gray-600">
+              Are you sure you want to restore this note? It will be moved back to your notes and will no longer be in trash.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => {
                 setRestoreDialogOpen(false);
                 setNoteToRestore(null);
               }}
+              className="border-gray-200 hover:bg-gray-50 text-gray-600"
             >
               Cancel
             </Button>
             <Button
               onClick={confirmRestore}
               disabled={isProcessing !== null}
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
               {isProcessing ? (
-                <>
-                  <MainLoader />
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Restoring...
-                </>
+                </span>
               ) : (
                 "Restore Note"
               )}

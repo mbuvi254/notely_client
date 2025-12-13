@@ -4,9 +4,9 @@ import NotelyHome from "./pages/notely/NotelyHome";
 import Notes from "./pages/notely/Notes";
 import ReadNote from "./pages/notely/ReadNote";
 import Dashboard from "./pages/Dashboard/Dashboard";
-import AuthorRegister from "./pages/Dashboard/AuthorRegister";
-import AuthorLogin from "./pages/Dashboard/AuthorLogin";
-import AuthorProfile from "./pages/Dashboard/AuthorProfile";
+import Register from "./pages/Dashboard/Register";
+import Login from "./pages/Dashboard/Login";
+import Profile from "./pages/Dashboard/Profile";
 import UpdateProfile from "./pages/Dashboard/UpdateProfile";
 import UpdatePassword from "./pages/Dashboard/UpdatePassword";
 import ViewNote from "./pages/Dashboard/ViewNote";
@@ -37,9 +37,9 @@ const App = () => {
         <Route path="/dashboard/notes/privacy" element={<PublicNotes />} />
 
 
-        <Route path="/dashboard/register" element={<AuthorRegister />} />
-        <Route path="/dashboard/login" element={<AuthorLogin />} />
-        <Route path="/dashboard/profile" element={<AuthorProfile />} />
+        <Route path="/dashboard/register" element={<Register />} />
+        <Route path="/dashboard/login" element={<Login />} />
+        <Route path="/dashboard/profile" element={<Profile />} />
         <Route path="/dashboard/profile/update" element={<UpdateProfile />} />
         <Route path="/dashboard/profile/update/password" element={<UpdatePassword />} />
       </Routes>
